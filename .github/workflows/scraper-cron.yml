@@ -1,0 +1,83 @@
+name: Stay Trails Scraper Cron
+
+on:
+  schedule:
+    # Run every 3 hours
+    - cron: '0 */3 * * *'
+  workflow_dispatch:
+    inputs:
+      region:
+        description: 'Target Region (leave blank for automatic highest deficit)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - 'Darjeeling'
+          - 'Kalimpong'
+          - 'Sikkim'
+          - 'Dooars'
+          - 'Rest of Bengal'
+      category:
+        description: 'Target Category (leave blank for automatic highest deficit)'
+        required: false
+        default: ''
+        type: choice
+        options:
+          - ''
+          - 'Homestay'
+          - 'Farmstay'
+          - 'Hostel/Backpacker'
+          - 'Estate & Tea Bungalow'
+          - 'Experiential Retreat'
+      limit:
+        description: 'Number of properties to scrape in this batch'
+        required: false
+        default: '8'
+
+concurrency:
+  group: scraper-cron
+  cancel-in-progress: false
+
+jobs:
+  scrape:
+    name: Scrape & Sync to Neon Postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install
+
+      - name: Install Chrome
+        run: |
+          npx puppeteer browsers install chrome
+
+      - name: Run Scraper Batch
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.region }}" ]; then
+            ARGS="$ARGS --region '${{ inputs.region }}'"
+          fi
+          if [ -n "${{ inputs.category }}" ]; then
+            ARGS="$ARGS --category '${{ inputs.category }}'"
+          fi
+          if [ -n "${{ inputs.limit }}" ]; then
+            ARGS="$ARGS --limit ${{ inputs.limit }}"
+          else
+            ARGS="$ARGS --limit 8"
+          fi
+
+          echo "Executing: bun run src/cli.ts $ARGS"
+          eval "bun run src/cli.ts $ARGS"

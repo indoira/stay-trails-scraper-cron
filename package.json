@@ -1,0 +1,34 @@
+{
+  "name": "stay-trails-scraper-cron",
+  "version": "1.0.0",
+  "description": "Automated Google Maps acquisition scraper cron for Stay Trails (synced with Neon Postgres & Discord)",
+  "main": "src/cli.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run src/cli.ts",
+    "scrape": "bun run src/cli.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "puppeteer",
+    "scraper",
+    "cron",
+    "neon",
+    "postgres",
+    "discord",
+    "stay-trails"
+  ],
+  "author": "Indoira Ventures Pvt. Ltd.",
+  "license": "MIT",
+  "dependencies": {
+    "@neondatabase/serverless": "^1.2.0",
+    "dotenv": "^16.4.7",
+    "puppeteer": "^24.3.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "typescript": "^5.7.3"
+  }
+}
